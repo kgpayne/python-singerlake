@@ -3,6 +3,11 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import List, final
 
+from singerlake import (
+    LAKE_MANIFEST_FILENAME,
+    STREAM_MANIFEST_FILENAME,
+    TAP_MANIFEST_FILENAME,
+)
 from singerlake.models import LakeManifest, StreamManifest, TapManifest
 
 
@@ -19,63 +24,95 @@ class BaseStore(ABC):
 
     @property
     def base_prefix(self) -> str:
-        """Base prefix for tap paths."""
+        """Base prefix for Tap paths."""
         return "raw/"
 
     def get_lake_path(self) -> str:
-        """Compose root path for this SingerLake."""
+        """Compose root path for this Lake."""
         return self.lake_root + self.base_prefix
 
     def get_tap_path(self, tap_id: str) -> str:
         """Compose path for a given tap_id."""
-        return self.get_lake_path + tap_id
+        return self.get_lake_path() + tap_id
 
     def get_stream_path(
         self, tap_id: str, stream_id: str, stream_schema_hash: str | None = None
     ) -> str:
-        """Compose path for a given tap_id and stream_id."""
+        """Compose path for a given Stream by tap_id and stream_id."""
         base_stream_path = self.get_tap_path(tap_id=tap_id) + stream_id
         if stream_schema_hash:
             return base_stream_path + stream_schema_hash
         return base_stream_path
 
+    def get_lake_manifest_path(self) -> str:
+        """Compose Lake manifest path."""
+        return f"{self.get_lake_path()}/{LAKE_MANIFEST_FILENAME}"
+
+    def get_tap_manifest_path(self, tap_id: str) -> str:
+        """Compose Tap manifest path."""
+        return f"{self.get_tap_path(tap_id=tap_id)}/{TAP_MANIFEST_FILENAME}"
+
+    def get_stream_manifest_path(self, tap_id: str, stream_id: str) -> str:
+        """Compose Stream manifest path."""
+        return f"{self.get_stream_path(tap_id=tap_id, stream_id=stream_id)}/{STREAM_MANIFEST_FILENAME}"
+
     @abstractmethod
+    def get_manifest(self, manifest_path: str, model: BaseModel) -> BaseModel:
+        """Get Manifest from path."""
+
+    @final
     def get_lake_manifest(self) -> LakeManifest | None:
-        """Read a SingerLake manifest.
+        """Read Lake manifest."""
+        return self.get_manifest(
+            manifest_path=self.get_lake_manifest_path(), model=LakeManifest
+        )
 
-        Manifests are expected to be at <tap_path>/manifest.json.
-        If no manifest is found, return None.
-        """
-
-    @abstractmethod
+    @final
     def get_tap_manifest(self, tap_id: str) -> TapManifest | None:
-        """Read a tap manifest by tap_id.
+        """Read Tap manifest by tap_id."""
+        return self.get_manifest(
+            manifest_path=self.get_tap_manifest_path(tap_id=tap_id), model=TapManifest
+        )
 
-        Manifests are expected to be at <tap_path>/manifest.json.
-        If no manifest is found, return None.
-        """
-
-    @abstractmethod
+    @final
     def get_stream_manifest(self, tap_id: str, stream_id: str) -> StreamManifest | None:
-        """Read a stream manifest by tap_id and stream_id.
-
-        Manifests are expected to be at <stream_path>/manifest.json.
-        If no manifest is found, return None.
-        """
+        """Read Stream manifest by tap_id and stream_id."""
+        return self.get_manifest(
+            manifest_path=self.get_stream_manifest_path(
+                tap_id=tap_id, stream_id=stream_id
+            ),
+            model=StreamManifest,
+        )
 
     @abstractmethod
+    def write_manifest(self, manifest_path: str, manifest: BaseModel):
+        """Write Manifest to given path."""
+
+    @final
     def write_lake_manifest(self, manifest: LakeManifest) -> None:
-        """Write Lake Manifest to file in storage."""
+        """Write Lake manifest."""
+        self.write_manifest(
+            manifest_path=self.get_lake_manifest_path(), manifest=manifest
+        )
 
-    @abstractmethod
+    @final
     def write_tap_manifest(self, tap_id: str, manifest: TapManifest) -> None:
-        """Write Tap Manifest to file in storage by tap_id."""
+        """Write Tap manifest."""
+        return self.write_manifest(
+            manifest_path=self.get_tap_manifest_path(tap_id=tap_id), manifest=manifest
+        )
 
-    @abstractmethod
+    @final
     def write_stream_manifest(
         self, tap_id: str, stream_id: str, manifest: StreamManifest
     ) -> None:
-        """Write Stream Manifest to file in storage by tap_id and stream_id."""
+        """Write Stream manifest."""
+        return self.write_manifest(
+            manifest_path=self.get_stream_manifest_path(
+                tap_id=tap_id, stream_id=stream_id
+            ),
+            manifest=manifest,
+        )
 
     @contextmanager
     @abstractmethod
