@@ -15,8 +15,8 @@ class TapManifest(BaseModel):
 class StreamManifest(BaseModel):
     """Stream Manifest."""
 
-    files: List[str]
-    versions: Mapping[str, str]
+    files: List[str] = []
+    versions: Mapping[str, str] = {}
 
     def add_files(self, file_names: List[str], schema_hash: str):
         """Add files to this Stream Manifest."""
