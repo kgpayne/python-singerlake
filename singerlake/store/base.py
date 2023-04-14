@@ -5,12 +5,12 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import List, final
 
-from singerlake import (
+from singerlake.models import BaseModel, LakeManifest, StreamManifest, TapManifest
+from singerlake.store.const import (
     LAKE_MANIFEST_FILENAME,
     STREAM_MANIFEST_FILENAME,
     TAP_MANIFEST_FILENAME,
 )
-from singerlake.models import BaseModel, LakeManifest, StreamManifest, TapManifest
 
 
 class BaseStore(ABC):
@@ -63,21 +63,21 @@ class BaseStore(ABC):
         """Get Manifest from path."""
 
     @final
-    def get_lake_manifest(self) -> LakeManifest | None:
+    def get_lake_manifest(self) -> LakeManifest:
         """Read Lake manifest."""
         return self.get_manifest(
             manifest_path=self.get_lake_manifest_path(), model=LakeManifest
         )
 
     @final
-    def get_tap_manifest(self, tap_id: str) -> TapManifest | None:
+    def get_tap_manifest(self, tap_id: str) -> TapManifest:
         """Read Tap manifest by tap_id."""
         return self.get_manifest(
             manifest_path=self.get_tap_manifest_path(tap_id=tap_id), model=TapManifest
         )
 
     @final
-    def get_stream_manifest(self, tap_id: str, stream_id: str) -> StreamManifest | None:
+    def get_stream_manifest(self, tap_id: str, stream_id: str) -> StreamManifest:
         """Read Stream manifest by tap_id and stream_id."""
         return self.get_manifest(
             manifest_path=self.get_stream_manifest_path(
@@ -118,7 +118,7 @@ class BaseStore(ABC):
 
     @contextmanager
     @abstractmethod
-    def lock_lake(self, timeout: int | None):
+    def lock_lake(self):
         """Context manager to acquire and release lock on this SingerLake.
 
         Locking is required to update the Lake Manifest.
@@ -126,7 +126,7 @@ class BaseStore(ABC):
 
     @contextmanager
     @abstractmethod
-    def lock_tap(self, tap_id: str, timeout: int | None):
+    def lock_tap(self, tap_id: str):
         """Context manager to acquire and release lock on a Tap by tap_id.
 
         Locking is required to update the Tap Manifest.
@@ -134,7 +134,7 @@ class BaseStore(ABC):
 
     @contextmanager
     @abstractmethod
-    def lock_stream(self, tap_id: str, stream_id: str, timeout: int | None):
+    def lock_stream(self, tap_id: str, stream_id: str):
         """Context manager to acquire and release lock on a Stream by tap_id and stream_id.
 
         Locking is required to update the Stream Manifest.
@@ -151,14 +151,13 @@ class BaseStore(ABC):
         stream_id: str,
         stream_schema_hash: str,
         files: List[Path],
-        lock_timeout: int | None,
     ) -> None:
         """Write files to Lake."""
         stream_path = self.get_stream_path(
             tap_id=tap_id, stream_id=stream_id, stream_schema_hash=stream_schema_hash
         )
         self.write_files_to_stream(stream_path=stream_path, files=files)
-        with self.lock_stream(tap_id=tap_id, stream_id=stream_id, timeout=lock_timeout):
+        with self.lock_stream(tap_id=tap_id, stream_id=stream_id):
             manifest = self.get_stream_manifest(tap_id=tap_id, stream_id=stream_id)
             manifest.add_files(
                 file_names=[file.name for file in files], schema_hash=stream_schema_hash
