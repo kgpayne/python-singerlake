@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "python-singerlake"
+version = "0.1.0"
+description = ""
+authors = ["Ken Payne <ken@meltano.com>"]
+readme = "README.md"
+packages = [{include = "singerlake"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pydantic = "^1.10.7"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
