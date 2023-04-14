@@ -1,6 +1,10 @@
 import json
+import shutil
+from contextlib import contextmanager
 from pathlib import Path
+from typing import List
 
+from filelock import FileLock
 from pydantic import BaseModel
 
 from singerlake import (
@@ -8,7 +12,6 @@ from singerlake import (
     STREAM_MANIFEST_FILENAME,
     TAP_MANIFEST_FILENAME,
 )
-from singerlake.models import LakeManifest, StreamManifest, TapManifest
 from singerlake.store import BaseStore
 
 
@@ -72,3 +75,30 @@ class LocalStore(BaseStore):
         manifest_path.mkdir(parents=True, exist_ok=True)
         with manifest_path.open("w") as manifest_file:
             manifest_file.write(manifest.json())
+
+    @contextmanager
+    def lock(self, lockfile_path: Path, timeout):
+        lock = FileLock(lockfile_path, timeout=timeout)
+        with lock:
+            yield
+
+    @contextmanager
+    def lock_lake(self, timeout: int | None):
+        lockfile_path = Path(f"{self.get_lake_manifest_path()}.lock")
+        yield from self.lock(lockfile_path=lockfile_path, timeout=timeout)
+
+    @contextmanager
+    def lock_tap(self, tap_id: str, timeout: int | None):
+        lockfile_path = Path(f"{self.get_tap_manifest_path(tap_id=tap_id)}.lock")
+        yield from self.lock(lockfile_path=lockfile_path, timeout=timeout)
+
+    @contextmanager
+    def lock_stream(self, tap_id: str, stream_id: str, timeout: int | None):
+        lockfile_path = Path(
+            f"{self.get_stream_manifest_path(tap_id=tap_id, stream_id=stream_id)}.lock"
+        )
+        yield from self.lock(lockfile_path=lockfile_path, timeout=timeout)
+
+    def write_files_to_stream(self, stream_path: Path, files: List[Path]):
+        for file in files:
+            shutil.copy(file, stream_path / file.name)

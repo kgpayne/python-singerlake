@@ -8,7 +8,7 @@ from singerlake import (
     STREAM_MANIFEST_FILENAME,
     TAP_MANIFEST_FILENAME,
 )
-from singerlake.models import LakeManifest, StreamManifest, TapManifest
+from singerlake.models import BaseModel, LakeManifest, StreamManifest, TapManifest
 
 
 class BaseStore(ABC):
