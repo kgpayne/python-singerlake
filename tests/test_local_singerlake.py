@@ -82,3 +82,4 @@ class TestLocalSingerlake:
                         / stream["schema_hash"]
                         / file.name
                     ).exists()
+        assert True
