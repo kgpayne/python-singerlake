@@ -5,8 +5,13 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import List, final
 
-from singerlake.models import BaseModel, LakeManifest, StreamManifest, TapManifest
-from singerlake.store.const import (
+from singerlake.stream.manifests.models import (
+    BaseModel,
+    LakeManifest,
+    StreamManifest,
+    TapManifest,
+)
+from singerlake.stream.stores import (
     LAKE_MANIFEST_FILENAME,
     STREAM_MANIFEST_FILENAME,
     TAP_MANIFEST_FILENAME,
