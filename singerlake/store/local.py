@@ -9,7 +9,7 @@ from typing import List
 from filelock import FileLock
 from pydantic import BaseModel
 
-from singerlake.stream.stores import (
+from singerlake.stream.store import (
     LAKE_MANIFEST_FILENAME,
     STREAM_MANIFEST_FILENAME,
     TAP_MANIFEST_FILENAME,
