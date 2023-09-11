@@ -3,8 +3,8 @@ from __future__ import annotations
 from uuid import uuid4
 
 from singerlake.config import SingerlakeConfig
-from singerlake.discovery.discovery_service import DiscoveryService
-from singerlake.manifest.manifest_service import ManifestService
+from singerlake.discovery import DiscoveryService
+from singerlake.manifest import ManifestService
 from singerlake.store import StoreService
 
 
@@ -20,8 +20,7 @@ class Singerlake:
             config=self.config.manifest,
         )
         self.discovery_service = DiscoveryService(
-            singerlake=self,
-            config=self.config.discovery,
+            singerlake=self, config=self.config.discovery
         )
 
     def list_taps(self):
