@@ -1,12 +1,19 @@
-from singerlake.locking.base import BaseLock
-from singerlake.store.base import BaseStore
-from singerlake.stream.config import StreamConfig
+from singerlake.manifest.models import StreamDefinition
+from singerlake.singerlake import Singerlake
+from singerlake.tap.tap import Tap
 
 
 class Stream:
     def __init__(
-        self, tap: Tap, stream_id: str, store: BaseStore, lock: BaseLock
+        self,
+        singerlake: Singerlake,
+        tap: Tap,
+        stream_definition: StreamDefinition,
     ) -> None:
+        self.singerlake = singerlake
         self.tap = tap
-        self.store = store
-        self.lock = lock
+        self.stream_definition = stream_definition
+
+    @property
+    def stream_id(self) -> str:
+        return self.stream_definition.stream_id
