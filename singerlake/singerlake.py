@@ -14,7 +14,7 @@ class Singerlake:
     def __init__(self, config: dict | None = None):
         self.instance_id = str(uuid4())
         self.config = SingerlakeConfig(config or {})
-        self.store = StoreService(config=self.config.store)
+        self.store = StoreService(config=self.config.store).get_store()
         self.manifest_service = ManifestService(
             singerlake=self,
             config=self.config.manifest,

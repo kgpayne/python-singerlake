@@ -3,7 +3,7 @@ from singerlake.store import BaseStore
 from singerlake.stream import Stream
 
 
-class BaseLock:
+class BaseLocker:
     """Base Lock."""
 
     def __init__(self, store: BaseStore, singerlake: SingerLake, stream: Stream = None):

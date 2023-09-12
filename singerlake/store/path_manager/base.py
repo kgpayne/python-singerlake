@@ -6,7 +6,7 @@ import farmhash
 import numpy as np
 
 
-class BasePath:
+class BasePathManager:
     def __init__(self):
         pass
 
