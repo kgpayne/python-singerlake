@@ -4,7 +4,7 @@ version = "0.1.0"
 description = ""
 authors = ["Ken Payne <ken@meltano.com>"]
 readme = "README.md"
-packages = [{include = "singerlake"}]
+packages = [{ include = "singerlake", from = "src" }]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.12"
@@ -13,6 +13,7 @@ filelock = "^3.11.0"
 pyfarmhash = "^0.3.2"
 numpy = "^1.24.2"
 base58 = "^2.1.1"
+petname = "^2.6"
 
 [tool.poetry.group.dev.dependencies]
 tox = "^4.4.12"
