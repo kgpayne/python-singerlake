@@ -8,8 +8,8 @@ from pathlib import Path
 from singerlake.manifest.models import (
     BaseModel,
     LakeManifest,
-    StreamDefinition,
-    TapDefinition,
+    StreamManifest,
+    TapManifest,
 )
 
 from .path_manager.constant import (
@@ -76,20 +76,20 @@ class BaseStore(ABC):
         )
 
     @t.final
-    def get_tap_manifest(self, tap_id: str) -> TapDefinition:
+    def get_tap_manifest(self, tap_id: str) -> TapManifest:
         """Read Tap manifest by tap_id."""
         return self.get_manifest(
-            manifest_path=self.get_tap_manifest_path(tap_id=tap_id), model=TapDefinition
+            manifest_path=self.get_tap_manifest_path(tap_id=tap_id), model=TapManifest
         )
 
     @t.final
-    def get_stream_manifest(self, tap_id: str, stream_id: str) -> StreamDefinition:
+    def get_stream_manifest(self, tap_id: str, stream_id: str) -> StreamManifest:
         """Read Stream manifest by tap_id and stream_id."""
         return self.get_manifest(
             manifest_path=self.get_stream_manifest_path(
                 tap_id=tap_id, stream_id=stream_id
             ),
-            model=StreamDefinition,
+            model=StreamManifest,
         )
 
     # @abstractmethod
@@ -104,7 +104,7 @@ class BaseStore(ABC):
         )
 
     @t.final
-    def write_tap_manifest(self, tap_id: str, manifest: TapDefinition) -> None:
+    def write_tap_manifest(self, tap_id: str, manifest: TapManifest) -> None:
         """Write Tap manifest."""
         return self.write_manifest(
             manifest_path=self.get_tap_manifest_path(tap_id=tap_id), manifest=manifest
@@ -112,7 +112,7 @@ class BaseStore(ABC):
 
     @t.final
     def write_stream_manifest(
-        self, tap_id: str, stream_id: str, manifest: StreamDefinition
+        self, tap_id: str, stream_id: str, manifest: StreamManifest
     ) -> None:
         """Write Stream manifest."""
         return self.write_manifest(
