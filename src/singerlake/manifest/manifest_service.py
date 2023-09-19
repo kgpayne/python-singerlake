@@ -1,6 +1,6 @@
 import typing as t
 
-from .models import LakeManifest, TapManifest
+from .models import LakeManifest, StreamManifest, TapManifest
 
 if t.TYPE_CHECKING:
     from singerlake import Singerlake
@@ -29,3 +29,11 @@ class ManifestService:
         tap_manifest = self.singerlake.store.read_tap_manifest(tap_id=tap_id)
         if tap_manifest:
             return TapManifest(**tap_manifest)
+
+    def get_stream_manifest(self, tap_id: str, stream_id: str):
+        """Get a Stream Manifest by ID."""
+        stream_manifest = self.singerlake.store.read_stream_manifest(
+            tap_id=tap_id, stream_id=stream_id
+        )
+        if stream_manifest:
+            return StreamManifest(**stream_manifest)

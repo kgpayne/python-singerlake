@@ -25,7 +25,7 @@ class Singerlake:
         self.discovery_service = DiscoveryService(singerlake=self)
         self.store = StoreService(singerlake=self, config=self.config.store).get_store()
 
-        self._lake_id = None
+        self._lake_id: str | None = None
 
     @property
     def lake_id(self) -> str:

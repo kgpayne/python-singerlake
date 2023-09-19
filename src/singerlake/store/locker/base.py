@@ -7,7 +7,7 @@ if t.TYPE_CHECKING:
 class BaseLocker:
     """Base Lock."""
 
-    def __init__(self, singerlake: "SingerLake"):
+    def __init__(self, singerlake: "Singerlake"):
         """Base Lock.
 
         Args:

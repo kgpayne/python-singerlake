@@ -19,7 +19,7 @@ class LocalStore(BaseStore):
         """Local directory store."""
         super().__init__(locker=locker, path_manager=path_manager)
 
-        self._lake_manifest_checksum = None
+        self._lake_manifest_checksum: str | None = None
 
     def _md5(self, file_path: Path):
         """Return the md5 checksum of a file."""
@@ -51,6 +51,7 @@ class LocalStore(BaseStore):
         if lake_manifest is not None:
             self._lake_manifest_checksum = self.read_lake_manifest_checksum()
             return lake_manifest
+        return None
 
     @property
     def lake_manifest_has_changed(self) -> bool:
@@ -64,3 +65,13 @@ class LocalStore(BaseStore):
             self.path_manager.get_tap_manifest_path(tap_id=tap_id)
         )
         return self._read_json(tap_manifest_path)
+
+    # Stream Manifest
+    def read_stream_manifest(self, tap_id: str, stream_id: str) -> dict | None:
+        """Read a Stream Manifest."""
+        stream_manifest_path = self._to_path(
+            self.path_manager.get_stream_manifest_path(
+                tap_id=tap_id, stream_id=stream_id
+            )
+        )
+        return self._read_json(stream_manifest_path)

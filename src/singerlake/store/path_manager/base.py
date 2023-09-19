@@ -19,7 +19,7 @@ class GenericPath:
 
     """Generic path class."""
 
-    def __init__(self, segments: tuple[str], relative: bool = False):
+    def __init__(self, segments: tuple[str, ...], relative: bool = False):
         self.segments = segments
         self.relative = relative
 

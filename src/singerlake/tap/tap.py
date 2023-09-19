@@ -16,7 +16,7 @@ class Tap:
         """Tap."""
         self.singerlake = singerlake
         self.tap_manifest = tap_manifest
-        self._stream_cache = None
+        self._stream_cache: t.Mapping[str, t.Any] | None = None
 
     @property
     def tap_id(self) -> str:
@@ -44,6 +44,6 @@ class Tap:
         """Stream IDs."""
         return self.tap_manifest.streams
 
-    def get_stream(self, stream_id: str) -> Stream:
+    def get_stream(self, stream_id: str) -> Stream | None:
         """Get Stream."""
         return self.streams.get(stream_id)
