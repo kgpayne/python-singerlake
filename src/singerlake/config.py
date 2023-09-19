@@ -1,10 +1,12 @@
+import typing as t
+
 from pydantic import BaseModel
 
 
 class GenericPathModel(BaseModel):
     """Generic Path Model."""
 
-    segments: tuple[str, ...]
+    segments: t.Tuple[str, ...]
     relative: bool = False
 
 
