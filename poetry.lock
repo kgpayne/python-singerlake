@@ -291,6 +291,17 @@ files = [
 ]
 
 [[package]]
+name = "petname"
+version = "2.6"
+description = "Generate human-readable, random object names"
+category = "main"
+optional = false
+python-versions = "*"
+files = [
+    {file = "petname-2.6.tar.gz", hash = "sha256:981c31ef772356a373640d1bb7c67c102e0159eda14578c67a1c99d5b34c9e4c"},
+]
+
+[[package]]
 name = "platformdirs"
 version = "3.10.0"
 description = "A small Python package for determining appropriate platform-specific dirs, e.g. a \"user data dir\"."
@@ -509,4 +520,4 @@ test = ["covdefaults (>=2.3)", "coverage (>=7.2.7)", "coverage-enable-subprocess
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<3.12"
-content-hash = "eca2e0b9855012e2b572979bdacc928b97e61ce16eb2e90431c912841b771c5b"
+content-hash = "49775160f0532737c14ecf229fb3de71fe16d45d831f01b2c46f4da7cba53d10"

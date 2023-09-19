@@ -13,6 +13,7 @@ filelock = "^3.11.0"
 pyfarmhash = "^0.3.2"
 numpy = "^1.24.2"
 base58 = "^2.1.1"
+petname = "^2.6"
 
 [tool.poetry.group.dev.dependencies]
 tox = "^4.4.12"

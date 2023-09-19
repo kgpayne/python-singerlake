@@ -14,22 +14,19 @@ class DiscoveryService:
 
     def __init__(self, singerlake: "Singerlake"):
         self.singerlake = singerlake
-        self.tap_cache: dict | None = None
+        self._tap_cache: t.List[str] | None = None
 
-    def list_taps(self):
+    def list_taps(self) -> t.List[str]:
         """List available Taps."""
-        if self.tap_cache is None:
-            lake_manifest = self.singerlake.manifest_service.get_lake_manifest()
-            self.tap_cache = {
-                tap_definition["tap_id"]: Tap(**tap_definition)
-                for tap_definition in lake_manifest.taps
-            }
+        if self._tap_cache is None:
+            lake_manifest = self.singerlake.manifest_service.lake_manifest
+            self._tap_cache = lake_manifest.taps
 
-        yield iter(self.tap_cache.values())
+        return self._tap_cache
 
     def get_tap(self, tap_id):
         """Get a Tap by ID."""
-        lake_manifest = self.singerlake.manifest_service.get_lake_manifest()
+        lake_manifest = self.singerlake.manifest_service.lake_manifest
         for tap_definition in lake_manifest.taps:
             if tap_definition["id"] == tap_id:
                 return Tap(**tap_definition)

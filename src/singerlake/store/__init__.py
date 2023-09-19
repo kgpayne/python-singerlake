@@ -1,10 +1,10 @@
 from .base import BaseStore
-from .constant import (
+from .local import LocalStore
+from .path_manager.constant import (
     LAKE_MANIFEST_FILENAME,
     STREAM_MANIFEST_FILENAME,
     TAP_MANIFEST_FILENAME,
 )
-from .local import LocalStore
 from .store_service import StoreService
 
 __all__ = [

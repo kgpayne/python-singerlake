@@ -4,7 +4,7 @@ import typing as t
 from pydantic import BaseModel
 
 
-class StreamDefinition(BaseModel):
+class StreamManifest(BaseModel):
     """Stream Manifest."""
 
     stream_id: str
@@ -13,15 +13,15 @@ class StreamDefinition(BaseModel):
     versions: t.Mapping[str, str] = {}
 
 
-class TapDefinition(BaseModel):
+class TapManifest(BaseModel):
     """Tap Manifest."""
 
     tap_id: str
-    streams: t.List[StreamDefinition] = []
+    streams: t.List[str] = []
 
 
 class LakeManifest(BaseModel):
     """Lake Manifest."""
 
     lake_id: str
-    taps: t.List[TapDefinition] = []
+    taps: t.List[str] = []

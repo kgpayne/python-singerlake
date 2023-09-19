@@ -1,11 +1,18 @@
 from pydantic import BaseModel
 
 
+class GenericPathModel(BaseModel):
+    """Generic Path Model."""
+
+    segments: tuple[str, ...]
+    relative: bool = False
+
+
 class PathConfig(BaseModel):
     """Singer Lake Path Config."""
 
     path_type: str = "hive"
-    lake_root: tuple[str, ...]
+    lake_root: GenericPathModel
 
 
 class LockConfig(BaseModel):

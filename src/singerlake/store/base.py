@@ -12,7 +12,7 @@ from singerlake.manifest.models import (
     TapDefinition,
 )
 
-from .constant import (
+from .path_manager.constant import (
     LAKE_MANIFEST_FILENAME,
     STREAM_MANIFEST_FILENAME,
     TAP_MANIFEST_FILENAME,

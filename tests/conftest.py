@@ -10,7 +10,10 @@ def singerlake_config():
             "store_type": "local",
             "path": {
                 "path_type": "hive",
-                "lake_root": ("tests", "data", "lake"),
+                "lake_root": {
+                    "segments": ("tests", "data", "lake"),
+                    "relative": True,
+                },
             },
             "lock": {
                 "lock_type": "local",

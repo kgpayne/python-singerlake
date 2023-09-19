@@ -1,6 +1,6 @@
 import typing as t
 
-from singerlake.manifest.models import StreamDefinition
+from singerlake.manifest.models import StreamManifest
 
 if t.TYPE_CHECKING:
     from singerlake import Singerlake
@@ -12,12 +12,12 @@ class Stream:
         self,
         singerlake: "Singerlake",
         tap: "Tap",
-        stream_definition: StreamDefinition,
+        stream_manifest: StreamManifest,
     ) -> None:
         self.singerlake = singerlake
         self.tap = tap
-        self.stream_definition = stream_definition
+        self.stream_manifest = stream_manifest
 
     @property
     def stream_id(self) -> str:
-        return self.stream_definition.stream_id
+        return self.stream_manifest.stream_id
