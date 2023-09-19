@@ -26,8 +26,7 @@ class DiscoveryService:
 
     def get_tap(self, tap_id):
         """Get a Tap by ID."""
-        lake_manifest = self.singerlake.manifest_service.lake_manifest
-        for tap_definition in lake_manifest.taps:
-            if tap_definition["id"] == tap_id:
-                return Tap(**tap_definition)
+        tap_manifest = self.singerlake.manifest_service.get_tap_manifest(tap_id=tap_id)
+        if tap_manifest:
+            return Tap(singerlake=self.singerlake, tap_manifest=tap_manifest)
         raise ValueError(f"Tap {tap_id} not found.")

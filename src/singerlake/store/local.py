@@ -16,8 +16,8 @@ class LocalStore(BaseStore):
     """Local directory store."""
 
     def __init__(self, locker: "BaseLocker", path_manager: "BasePathManager"):
-        self.locker = locker
-        self.path_manager = path_manager
+        """Local directory store."""
+        super().__init__(locker=locker, path_manager=path_manager)
 
         self._lake_manifest_checksum = None
 
@@ -38,6 +38,7 @@ class LocalStore(BaseStore):
         """Convert a GenericPath to a pathlib Path."""
         return Path(*generic_path.segments)
 
+    # Lake Manifest
     def read_lake_manifest_checksum(self) -> str | None:
         """Read the Lake Manifest checksum."""
         lake_manifest_path = self._to_path(self.path_manager.lake_manifest_path)
@@ -55,3 +56,11 @@ class LocalStore(BaseStore):
     def lake_manifest_has_changed(self) -> bool:
         """Return True if the Lake Manifest has changed."""
         return self.read_lake_manifest_checksum() != self._lake_manifest_checksum
+
+    # Tap Manifest
+    def read_tap_manifest(self, tap_id: str) -> dict | None:
+        """Read a Tap Manifest."""
+        tap_manifest_path = self._to_path(
+            self.path_manager.get_tap_manifest_path(tap_id=tap_id)
+        )
+        return self._read_json(tap_manifest_path)
