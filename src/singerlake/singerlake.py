@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import shutil
 import typing as t
+from pathlib import Path
 from uuid import uuid4
 
 from singerlake.config import SingerlakeConfig
@@ -33,6 +35,25 @@ class Singerlake:
         if self._lake_id is None:
             self._lake_id = self.manifest_service.lake_manifest.lake_id
         return self._lake_id
+
+    @property
+    def working_dir(self) -> Path:
+        """Return the local working directory."""
+        if self.config.working_dir:
+            working_dir = (
+                Path.cwd() / Path(*self.config.working_dir.segments)
+                if self.config.working_dir.relative
+                else Path(*self.config.working_dir.segments)
+            )
+        else:
+            working_dir = Path.cwd() / ".singerlake"
+
+        working_dir.mkdir(parents=True, exist_ok=True)
+        return working_dir
+
+    def clean_working_dir(self) -> None:
+        """Clean the local working directory."""
+        shutil.rmtree(self.working_dir, ignore_errors=True)
 
     def list_taps(self) -> list[str]:
         """Return Taps stored in this Singerlake."""

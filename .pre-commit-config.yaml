@@ -1,0 +1,59 @@
+ci:
+  autofix_prs: true
+  autoupdate_schedule: weekly
+  autoupdate_commit_msg: "chore: pre-commit autoupdate"
+
+repos:
+  - repo: local
+    hooks:
+      - id: check-poetry-lock
+        # `pre-commit autoupdate` will update to older Poetry versions, so we
+        # use a local hook to avoid that bug:
+        # https://github.com/meltano/meltano/pull/7238#issuecomment-1409434351
+        name: check that `poetry.lock` conforms to `pyproject.toml`
+        entry: poetry lock --check
+        language: python
+        pass_filenames: false
+        additional_dependencies:
+          - "poetry==1.6.1"
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: "v4.4.0"
+    hooks:
+      - id: check-json
+        exclude: \.vscode/launch.json$
+      - id: check-toml
+      - id: check-yaml
+        exclude: ^(.+/)?template\.ya?ml$
+      - id: check-merge-conflict
+      - id: end-of-file-fixer
+        exclude: (.*\.svg)
+      - id: trailing-whitespace
+        exclude: ^(.bumpversion.cfg)$
+
+  - repo: https://github.com/Lucas-C/pre-commit-hooks
+    rev: "v1.5.4"
+    hooks:
+      - id: remove-crlf
+      - id: remove-tabs
+        args: ["--whitespaces-count", "4"]
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: "v0.0.289"
+    hooks:
+      - id: ruff
+        args: ["--fix", "--exit-non-zero-on-fix", "--show-fixes"]
+      - id: ruff
+        name: Ruff format
+        entry: ruff format
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: "v1.5.1"
+    hooks:
+      - id: mypy
+        exclude: |
+          (?x)^(
+             .*tests.*|
+           )$
+        additional_dependencies:
+          - "types-PyYAML==6.0.12.2"

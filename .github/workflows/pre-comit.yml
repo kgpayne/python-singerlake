@@ -1,0 +1,53 @@
+name: pre-commit
+
+on:
+  merge_group:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install libcurl4-openssl-dev libssl-dev
+
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+
+      - name: Cache pre-commit environments
+        uses: actions/cache@v3
+        with:
+          key: pre-commit-config-${{ hashFiles('.pre-commit-config.yaml') }}
+          path: ~/.cache/pre-commit
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+          architecture: x64
+
+      - name: Install Poetry
+        run: |
+          pipx install poetry
+          poetry --version
+
+      - name: Configure Poetry
+        run: |
+          poetry env use 3.11
+          poetry debug info
+
+      - name: Install dependencies
+        run: poetry install
+
+      - name: pre-commit
+        run: poetry run pre-commit run --show-diff-on-failure --color=always --all-files

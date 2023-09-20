@@ -35,3 +35,4 @@ class SingerlakeConfig(BaseModel):
     """Singer Lake Config."""
 
     store: StoreConfig
+    working_dir: t.Optional[GenericPathModel] = None
