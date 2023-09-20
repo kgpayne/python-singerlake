@@ -1,4 +1,8 @@
+from pathlib import Path
+
 import pytest  # noqa: F401
+
+from tests.utils import TestStreamWriter
 
 
 def test_singerlake(singerlake):
@@ -20,3 +24,13 @@ def test_discovery(singerlake):
         "generationmix",
         "region",
     ]
+
+
+def test_stream_writer(singerlake):
+    input_file_path = Path.cwd() / "tests" / "data" / "test_inputs" / "entry.jsonl"
+    tap = singerlake.get_tap("tap-carbon-intensity")
+    stream = tap.get_stream("entry")
+    stream_writer = TestStreamWriter(input_stream_path=input_file_path)
+    stream = stream_writer.write_messages_to_stream(stream=stream)
+    assert len(stream.files) == 1
+    assert stream.files[0].name == "entry-20230920T140156Z-20230920T140156Z.singer"

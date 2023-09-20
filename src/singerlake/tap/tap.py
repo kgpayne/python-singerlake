@@ -24,26 +24,20 @@ class Tap:
         return self.tap_manifest.tap_id
 
     @property
-    def streams(self) -> t.Mapping[str, Stream]:
-        """Streams."""
-        if self._stream_cache is None:
-            self._stream_cache = {}
-            for stream_id in self.tap_manifest.streams:
-                stream_manifest = self.singerlake.manifest_service.get_stream_manifest(
-                    tap_id=self.tap_id, stream_id=stream_id
-                )
-                self._stream_cache[stream_id] = Stream(
-                    singerlake=self.singerlake,
-                    tap=self,
-                    stream_manifest=stream_manifest,
-                )
-        return self._stream_cache
-
-    @property
     def stream_ids(self) -> list[str]:
         """Stream IDs."""
         return self.tap_manifest.streams
 
+    def discover_streams(self) -> t.Mapping[str, Stream]:
+        """Streams."""
+        if self._stream_cache is None:
+            self._stream_cache = {}
+            for stream_id in self.tap_manifest.streams:
+                self._stream_cache[stream_id] = Stream(
+                    singerlake=self.singerlake, tap=self, stream_id=stream_id
+                )
+        return self._stream_cache
+
     def get_stream(self, stream_id: str) -> Stream | None:
         """Get Stream."""
-        return self.streams.get(stream_id)
+        return self.discover_streams().get(stream_id)
