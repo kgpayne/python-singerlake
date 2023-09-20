@@ -4,14 +4,14 @@ from singerlake import Singerlake
 
 
 @pytest.fixture(scope="session")
-def singerlake_config():
+def read_singerlake_config():
     return {
         "store": {
             "store_type": "local",
             "path": {
                 "path_type": "hive",
                 "lake_root": {
-                    "segments": ("tests", "data", "lake"),
+                    "segments": ("tests", "data", "read_lake"),
                     "relative": True,
                 },
             },
@@ -23,5 +23,8 @@ def singerlake_config():
 
 
 @pytest.fixture(scope="session")
-def singerlake(singerlake_config: dict):
-    yield Singerlake(config=singerlake_config)
+def read_singerlake(singerlake_config: dict):
+    singerlake = Singerlake(config=singerlake_config)
+    singerlake.clean_working_dir()
+    yield singerlake
+    singerlake.clean_working_dir()

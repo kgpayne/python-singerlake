@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import shutil
 import typing as t
 from pathlib import Path
 from uuid import uuid4
@@ -49,6 +50,10 @@ class Singerlake:
 
         working_dir.mkdir(parents=True, exist_ok=True)
         return working_dir
+
+    def clean_working_dir(self) -> None:
+        """Clean the local working directory."""
+        shutil.rmtree(self.working_dir, ignore_errors=True)
 
     def list_taps(self) -> list[str]:
         """Return Taps stored in this Singerlake."""
