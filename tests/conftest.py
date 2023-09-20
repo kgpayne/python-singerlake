@@ -23,8 +23,8 @@ def read_singerlake_config():
 
 
 @pytest.fixture(scope="session")
-def read_singerlake(singerlake_config: dict):
-    singerlake = Singerlake(config=singerlake_config)
+def read_singerlake(read_singerlake_config: dict):
+    singerlake = Singerlake(config=read_singerlake_config)
     singerlake.clean_working_dir()
     yield singerlake
     singerlake.clean_working_dir()
