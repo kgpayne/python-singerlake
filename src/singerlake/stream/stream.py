@@ -1,12 +1,11 @@
 import typing as t
 from contextlib import contextmanager
-from pathlib import Path
-
-from singerlake.manifest.models import StreamManifest
 
 from .record_writer import RecordWriter
 
 if t.TYPE_CHECKING:
+    from pathlib import Path
+
     from singerlake import Singerlake
     from singerlake.tap import Tap
 
@@ -40,4 +39,6 @@ class Stream:
     def commit(self):
         """Commit stream files to storage."""
         raise NotImplementedError
-        # self.singerlake.store.commit_stream_files(stream=self, stream_files=self.files)
+        # self.singerlake.store.commit_stream_files(
+        #   stream=self, stream_files=self.files
+        # )

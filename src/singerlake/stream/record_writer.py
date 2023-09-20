@@ -23,8 +23,21 @@ class RecordWriter:
         self._current_file: SingerFileWriter | None = None
         self._record_count = 0
 
+    @property
+    def current_file(self) -> SingerFileWriter:
+        """Return the current file."""
+        if self._current_file is None:
+            raise ValueError("File not open.")
+
+        return self._current_file
+
+    @current_file.setter
+    def current_file(self, value: SingerFileWriter) -> None:
+        """Set the current file."""
+        self._current_file = value
+
     def open(self) -> RecordWriter:
-        self._current_file = SingerFileWriter(stream=self.stream).open()
+        self.current_file = SingerFileWriter(stream=self.stream).open()
         return self
 
     def close(self):
@@ -35,7 +48,7 @@ class RecordWriter:
         self._finalize_current_file()
 
     def _finalize_current_file(self):
-        finalized_file_path = self._current_file.close(output_dir=self.output_dir)
+        finalized_file_path = self.current_file.close(output_dir=self.output_dir)
         self._current_file = None
         self.files.append(finalized_file_path)
 
@@ -45,12 +58,12 @@ class RecordWriter:
         if self._record_count == MAX_RECORD_COUNT:
             self._finalize_current_file()
             # open a new file
-            self._current_file = SingerFileWriter(stream=self.stream).open()
+            self.current_file = SingerFileWriter(stream=self.stream).open()
             self._record_count = 0
 
         if self._record_count == 0:
             # write the stream schema
-            self._current_file.write_schema(schema)
+            self.current_file.write_schema(schema)
 
-        self._current_file.write_record(record)
+        self.current_file.write_record(record)
         self._record_count += 1

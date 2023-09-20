@@ -19,12 +19,50 @@ class SingerFileWriter:
     def __init__(self, stream: "Stream") -> None:
         self.stream = stream
 
-        self.tmp_dir: Path | None = None
-        self.file_path: Path | None = None
-        self.file: TextIOWrapper | None = None
+        self._tmp_dir: Path | None = None
+        self._file: TextIOWrapper | None = None
+        self._file_path: Path | None = None
+        self._min_time_extracted: datetime | None = None
+        self._max_time_extracted: datetime | None = None
 
-        self.min_time_extracted: datetime | None = None
-        self.max_time_extracted: datetime | None = None
+    @property
+    def file_path(self) -> Path:
+        """Return the file path."""
+        if self._file_path is None:
+            raise ValueError("File has not been written to.")
+
+        return self._file_path
+
+    @file_path.setter
+    def file_path(self, value: Path) -> None:
+        """Set the file path."""
+        self._file_path = value
+
+    @property
+    def file(self) -> TextIOWrapper:
+        """Return the file."""
+        if self._file is None:
+            raise ValueError("File has not been opened.")
+
+        return self._file
+
+    @file.setter
+    def file(self, value: TextIOWrapper) -> None:
+        """Set the file."""
+        self._file = value
+
+    @property
+    def tmp_dir(self) -> Path:
+        """Return the temporary directory."""
+        if self._tmp_dir is None:
+            raise ValueError("Temporary directory has not been created.")
+
+        return self._tmp_dir
+
+    @tmp_dir.setter
+    def tmp_dir(self, value: Path) -> None:
+        """Set the temporary directory."""
+        self._tmp_dir = value
 
     def _get_time_extracted(self, record: dict) -> datetime:
         """Return the time extracted from a record."""
@@ -45,20 +83,23 @@ class SingerFileWriter:
     @property
     def file_name(self) -> str:
         """Return the file name."""
-        file_start_time = self.min_time_extracted.strftime("%Y%m%dT%H%M%SZ")
-        file_stop_time = self.max_time_extracted.strftime("%Y%m%dT%H%M%SZ")
+        if not self._min_time_extracted or not self._max_time_extracted:
+            raise ValueError("File has not been written to.")
+
+        file_start_time = self._min_time_extracted.strftime("%Y%m%dT%H%M%SZ")
+        file_stop_time = self._max_time_extracted.strftime("%Y%m%dT%H%M%SZ")
         return f"{self.stream.stream_id}-{file_start_time}-{file_stop_time}.singer"
 
     def open(self) -> SingerFileWriter:
         """Create a temporary directory and new file to write records to."""
-        if self.tmp_dir is None:
+        if self._tmp_dir is None:
             self.tmp_dir = Path(tempfile.mkdtemp())
         self._open_file(self.tmp_dir)
         return self
 
-    def close(self, output_dir: Path) -> None:
+    def close(self, output_dir: Path) -> Path:
         """Remove the temporary directory."""
-        if self.file is None:
+        if self._file is None:
             raise ValueError("File not open")
 
         if not self.file.closed:
@@ -66,7 +107,7 @@ class SingerFileWriter:
 
         output_file_path = output_dir / self.file_name
         shutil.move(self.file_path, output_file_path)
-        self.file = None
+        self._file = None
 
         if self.tmp_dir.exists():
             shutil.rmtree(self.tmp_dir, ignore_errors=True)
@@ -75,29 +116,29 @@ class SingerFileWriter:
 
     def write_record(self, record: dict) -> None:
         """Write a record to the file."""
-        if self.file is None:
+        if self._file is None:
             raise ValueError("File not open")
 
         time_extracted = self._get_time_extracted(record)
 
-        if self.min_time_extracted is None:
-            self.min_time_extracted = time_extracted
+        if self._min_time_extracted is None:
+            self._min_time_extracted = time_extracted
 
-        if self.max_time_extracted is None:
-            self.max_time_extracted = time_extracted
+        if self._max_time_extracted is None:
+            self._max_time_extracted = time_extracted
 
-        if time_extracted < self.min_time_extracted:
-            self.min_time_extracted = time_extracted
+        if time_extracted < self._min_time_extracted:
+            self._min_time_extracted = time_extracted
 
-        if time_extracted > self.max_time_extracted:
-            self.max_time_extracted = time_extracted
+        if time_extracted > self._max_time_extracted:
+            self._max_time_extracted = time_extracted
 
         payload = json.dumps(record, ensure_ascii=False)
         self.file.write(f"{payload}\n")
 
     def write_schema(self, schema: dict) -> None:
         """Write a schema to the file."""
-        if self.file is None:
+        if self._file is None:
             raise ValueError("File not open")
 
         self.file.write(f"{json.dumps(schema, ensure_ascii=False)}\n")
