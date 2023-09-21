@@ -34,7 +34,7 @@ class RecordWriter:
     def _new_file(self, partition: t.Tuple[t.Any, ...]) -> SingerFileWriter:
         """Return a new file."""
         file = SingerFileWriter(stream=self.stream).open()
-        self._open_files[partition] = file
+        self._open_files.set(keys=partition, value=file)
         return file
 
     def write(self, schema: dict, record: dict) -> None:
@@ -42,7 +42,7 @@ class RecordWriter:
 
         # partition the record
         time_extracted = su.get_time_extracted(record)
-        partition = self.stream.partition_record(time_extracted)
+        partition = self.stream.partition_record(time_extracted) or ("default",)
         file = self._open_files.get(partition)
 
         if not file or file.closed:

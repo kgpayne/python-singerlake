@@ -32,5 +32,8 @@ def test_stream_writer(read_singerlake):
     stream = tap.get_stream("entry")
     stream_writer = TestStreamWriter(input_stream_path=input_file_path)
     stream = stream_writer.write_messages_to_stream(stream=stream)
-    assert len(stream.files) == 1
-    assert stream.files[0].name == "entry-20230920T140156Z-20230920T140156Z.singer"
+    assert len(stream.files) == 2
+    assert [file.name for file in stream.files] == [
+        "entry-20200819T130156Z-20200819T130156Z.singer",
+        "entry-20230920T140156Z-20230920T140156Z.singer",
+    ]
