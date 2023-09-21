@@ -9,10 +9,42 @@ from io import TextIOWrapper
 from pathlib import Path
 from uuid import uuid4
 
+from pydantic import BaseModel
+
 import singerlake.singer.utils as su
 
 if t.TYPE_CHECKING:
     from .stream import Stream
+
+
+class SingerFile(BaseModel):
+    """Singer file object."""
+
+    stream_id: str
+    parent_dir: Path
+    partition: tuple[int, ...]
+    min_time_extracted: datetime
+    max_time_extracted: datetime
+    encryption: t.Literal["none", "bz2", "gz"] = "none"
+
+    @property
+    def name(self):
+        """Return the filename."""
+        file_start_time = self.min_time_extracted.strftime("%Y%m%dT%H%M%SZ")
+        file_stop_time = self.max_time_extracted.strftime("%Y%m%dT%H%M%SZ")
+        file_name = f"{self.stream_id}-{file_start_time}-{file_stop_time}.singer"
+        if self.encryption != "none":
+            file_name += f".{self.encryption}"
+        return file_name
+
+    @property
+    def path(self):
+        """Return the file path."""
+        return self.parent_dir / self.name
+
+    def __repr__(self) -> str:
+        """Return a string representation of the object."""
+        return f"{self.__class__.__name__}({self.path})"
 
 
 class SingerFileWriter:
@@ -68,16 +100,6 @@ class SingerFileWriter:
         self._tmp_dir = value
 
     @property
-    def file_name(self) -> str:
-        """Return the file name."""
-        if not self._min_time_extracted or not self._max_time_extracted:
-            raise ValueError("File has not been written to.")
-
-        file_start_time = self._min_time_extracted.strftime("%Y%m%dT%H%M%SZ")
-        file_stop_time = self._max_time_extracted.strftime("%Y%m%dT%H%M%SZ")
-        return f"{self.stream.stream_id}-{file_start_time}-{file_stop_time}.singer"
-
-    @property
     def closed(self) -> bool:
         """Return True if the file is closed."""
         return self._file is None
@@ -95,7 +117,7 @@ class SingerFileWriter:
         self._open_file(self.tmp_dir)
         return self
 
-    def close(self, output_dir: Path) -> Path:
+    def close(self, output_dir: Path, partition: t.Tuple[t.Any, ...]) -> SingerFile:
         """Remove the temporary directory."""
         if self._file is None:
             raise ValueError("File not open")
@@ -103,14 +125,20 @@ class SingerFileWriter:
         if not self.file.closed:
             self.file.close()
 
-        output_file_path = output_dir / self.file_name
-        shutil.move(self.file_path, output_file_path)
+        singer_file = SingerFile(
+            stream_id=self.stream.stream_id,
+            parent_dir=output_dir,
+            partition=partition,
+            min_time_extracted=self._min_time_extracted,
+            max_time_extracted=self._max_time_extracted,
+        )
+        shutil.move(self.file_path, singer_file.path)
         self._file = None
 
         if self.tmp_dir.exists():
             shutil.rmtree(self.tmp_dir, ignore_errors=True)
 
-        return output_file_path
+        return singer_file
 
     def write_record(self, record: dict) -> None:
         """Write a record to the file."""

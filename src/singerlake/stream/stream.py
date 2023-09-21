@@ -1,11 +1,11 @@
 import typing as t
 from contextlib import contextmanager
 
+from .file_writer import SingerFile
 from .record_writer import RecordWriter
 
 if t.TYPE_CHECKING:
     from datetime import datetime
-    from pathlib import Path
 
     from singerlake import Singerlake
     from singerlake.config import Partition
@@ -33,7 +33,7 @@ class Stream:
             self.singerlake.config.store.path.partition_by or []
         )
 
-        self.files: list[Path] = []
+        self.files: list[SingerFile] = []
 
     def partition_record(self, time_extracted: "datetime") -> t.Tuple[str, ...]:
         """Partition a record."""
@@ -53,7 +53,7 @@ class Stream:
             yield writer
         finally:
             writer.finalize()
-            self.files.extend(writer.files)
+            self.files.extend(writer.singer_files)
 
     def commit(self):
         """Commit stream files to storage."""
