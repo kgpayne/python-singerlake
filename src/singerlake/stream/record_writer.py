@@ -3,6 +3,10 @@ from __future__ import annotations
 import typing as t
 from pathlib import Path
 
+from flexdict import FlexDict
+
+import singerlake.singer.utils as su
+
 from .file_writer import SingerFileWriter
 
 if t.TYPE_CHECKING:
@@ -20,50 +24,43 @@ class RecordWriter:
         self.output_dir = output_dir
 
         self.files: list[Path] = []
-        self._current_file: SingerFileWriter | None = None
-        self._record_count = 0
+        self.is_finalized = False
+        self._open_files: FlexDict = FlexDict()
 
-    @property
-    def current_file(self) -> SingerFileWriter:
-        """Return the current file."""
-        if self._current_file is None:
-            raise ValueError("File not open.")
-
-        return self._current_file
-
-    @current_file.setter
-    def current_file(self, value: SingerFileWriter) -> None:
-        """Set the current file."""
-        self._current_file = value
-
-    def open(self) -> RecordWriter:
-        self.current_file = SingerFileWriter(stream=self.stream).open()
-        return self
-
-    def close(self):
-        """Finalize the last file."""
-        if self._current_file is None:
-            raise ValueError("File not open.")
-
-        self._finalize_current_file()
-
-    def _finalize_current_file(self):
-        finalized_file_path = self.current_file.close(output_dir=self.output_dir)
-        self._current_file = None
+    def _finalize_file(self, file: SingerFileWriter) -> None:
+        finalized_file_path = file.close(output_dir=self.output_dir)
         self.files.append(finalized_file_path)
+
+    def _new_file(self, partition: t.Tuple[t.Any, ...]) -> SingerFileWriter:
+        """Return a new file."""
+        file = SingerFileWriter(stream=self.stream).open()
+        self._open_files.set(keys=partition, value=file)
+        return file
 
     def write(self, schema: dict, record: dict) -> None:
         """Write a record to the stream."""
 
-        if self._record_count == MAX_RECORD_COUNT:
-            self._finalize_current_file()
+        # partition the record
+        time_extracted = su.get_time_extracted(record)
+        partition = self.stream.partition_record(time_extracted) or ("default",)
+        file = self._open_files.get(partition)
+
+        if not file or file.closed:
+            file = self._new_file(partition)
+
+        if file.records_written == MAX_RECORD_COUNT:
+            self._finalize_file(file)
             # open a new file
-            self.current_file = SingerFileWriter(stream=self.stream).open()
-            self._record_count = 0
+            file = self._new_file(partition)
 
-        if self._record_count == 0:
+        if file.records_written == 0:
             # write the stream schema
-            self.current_file.write_schema(schema)
+            file.write_schema(schema)
 
-        self.current_file.write_record(record)
-        self._record_count += 1
+        file.write_record(record)
+
+    def finalize(self) -> None:
+        """Finalize the stream."""
+        for file in self._open_files.values(nested=True):
+            self._finalize_file(file)
+        self.is_finalized = True

@@ -3,6 +3,12 @@ import typing as t
 from pydantic import BaseModel
 
 
+class Partition(BaseModel):
+    """Partition Model."""
+
+    by: t.Literal["year", "month", "day", "hour", "minute", "second"]
+
+
 class GenericPathModel(BaseModel):
     """Generic Path Model."""
 
@@ -15,6 +21,12 @@ class PathConfig(BaseModel):
 
     path_type: str = "hive"
     lake_root: GenericPathModel
+    partition_by: t.Optional[t.List[Partition]] = [
+        Partition(by="year"),
+        Partition(by="month"),
+        Partition(by="day"),
+        Partition(by="hour"),
+    ]
 
 
 class LockConfig(BaseModel):

@@ -78,6 +78,17 @@ testing = ["covdefaults (>=2.3)", "coverage (>=7.3)", "diff-cover (>=7.7)", "pyt
 typing = ["typing-extensions (>=4.7.1)"]
 
 [[package]]
+name = "flexdict"
+version = "0.0.1a1"
+description = "Python dict with automatic and arbitrary levels of nesting along with additional utility methods."
+optional = false
+python-versions = ">=2.7"
+files = [
+    {file = "flexdict-0.0.1a1-py2.py3-none-any.whl", hash = "sha256:9d61ec919d69089ec0b6d4626fa364b85d3349d54397516140e95322faddb609"},
+    {file = "flexdict-0.0.1a1.tar.gz", hash = "sha256:4c531df45f3e04171ac13d63eef5666144c1803fdc8cf4c834f88445f87054eb"},
+]
+
+[[package]]
 name = "identify"
 version = "2.5.29"
 description = "File identification library for Python"
@@ -430,4 +441,4 @@ test = ["covdefaults (>=2.3)", "coverage (>=7.2.7)", "coverage-enable-subprocess
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<3.12"
-content-hash = "443e5b6651b343fb976a48a2590837813492f1a29160a2d4923fba62799e02fb"
+content-hash = "a3951d1d8024f8e834c978f50b1c1341fa6548bc553e2de8908a805ff6c602d7"
