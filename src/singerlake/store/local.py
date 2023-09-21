@@ -9,6 +9,7 @@ from .base import BaseStore
 
 if t.TYPE_CHECKING:
     from singerlake.store.path_manager.base import GenericPath
+    from singerlake.stream.stream import Stream
 
     from .locker.base import BaseLocker
     from .path_manager.base import BasePathManager
@@ -77,3 +78,13 @@ class LocalStore(BaseStore):
             )
         )
         return self._read_json(stream_manifest_path)
+
+    # Stream Files
+    def _commit_stream_file(self, stream: "Stream", stream_file: "Path") -> None:
+        """Commit a stream file to storage."""
+        pass
+
+    def commit_stream_files(self, stream: "Stream", stream_files: list["Path"]) -> None:
+        """Commit stream files to storage."""
+        for stream_file in stream_files:
+            self._commit_stream_file(stream=stream, stream_file=stream_file)

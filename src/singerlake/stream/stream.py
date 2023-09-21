@@ -57,7 +57,4 @@ class Stream:
 
     def commit(self):
         """Commit stream files to storage."""
-        raise NotImplementedError
-        # self.singerlake.store.commit_stream_files(
-        #   stream=self, stream_files=self.files
-        # )
+        self.singerlake.store.commit_stream_files(stream=self, stream_files=self.files)
