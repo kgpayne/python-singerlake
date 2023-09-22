@@ -23,7 +23,7 @@ class SingerFile(BaseModel):
     tap_id: str
     schema_: dict = Field(alias="schema")
     parent_dir: Path
-    partition: tuple[int, ...]
+    partition: t.Tuple[int, ...]
     min_time_extracted: datetime
     max_time_extracted: datetime
     encryption: t.Literal["none", "bz2", "gz"] = "none"
