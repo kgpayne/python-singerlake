@@ -95,6 +95,6 @@ class BasePathManager:
             self.get_stream_path(
                 tap_id=stream_file.tap_id, stream_id=stream_file.stream_id
             )
-            .extend(self.hash_stream_schema(stream_file.schema))
-            .extend(stream_file.filename)
+            .extend(self.hash_stream_schema(stream_file.schema_))
+            .extend(stream_file.name)
         )

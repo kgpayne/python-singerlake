@@ -53,5 +53,6 @@ def test_stream_commit(write_singerlake):
         / "raw"
         / "tap-carbon-intensity"
         / "entry"
+        / "Y8Mjkb4i9yM"
     )
     assert stream_files_path.exists()

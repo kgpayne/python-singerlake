@@ -9,7 +9,7 @@ from io import TextIOWrapper
 from pathlib import Path
 from uuid import uuid4
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 import singerlake.singer.utils as su
 
@@ -21,7 +21,7 @@ class SingerFile(BaseModel):
     """Singer file object."""
 
     tap_id: str
-    schema: dict
+    schema_: dict = Field(alias="schema")
     parent_dir: Path
     partition: tuple[int, ...]
     min_time_extracted: datetime
@@ -41,7 +41,7 @@ class SingerFile(BaseModel):
     @property
     def stream_id(self):
         """Return the stream ID."""
-        return self.schema["stream"]
+        return self.schema_["stream"]
 
     @property
     def path(self):
