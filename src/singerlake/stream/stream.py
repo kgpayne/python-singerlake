@@ -57,4 +57,4 @@ class Stream:
 
     def commit(self):
         """Commit stream files to storage."""
-        self.singerlake.store.commit_stream_files(stream=self, stream_files=self.files)
+        self.singerlake.store.commit_stream_files(tap=self.tap, stream_files=self.files)

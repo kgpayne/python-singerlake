@@ -15,6 +15,7 @@ from .constant import (
 
 if t.TYPE_CHECKING:
     from singerlake.config import PathConfig
+    from singerlake.stream.file_writer import SingerFile
 
 
 class GenericPath:
@@ -70,12 +71,30 @@ class BasePathManager:
         """Get the lake manifest path."""
         return self.lake_root.extend(*("raw", LAKE_MANIFEST_FILENAME))
 
+    def get_tap_path(self, tap_id: str) -> GenericPath:
+        """Get the tap path."""
+        return self.lake_root.extend(*("raw", tap_id))
+
     def get_tap_manifest_path(self, tap_id: str) -> GenericPath:
         """Get the tap manifest path."""
-        return self.lake_root.extend(*("raw", tap_id, TAP_MANIFEST_FILENAME))
+        return self.get_tap_path(tap_id=tap_id).extend(TAP_MANIFEST_FILENAME)
+
+    def get_stream_path(self, tap_id: str, stream_id: str) -> GenericPath:
+        """Get the stream path."""
+        return self.get_tap_path(tap_id=tap_id).extend(stream_id)
 
     def get_stream_manifest_path(self, tap_id: str, stream_id: str) -> GenericPath:
         """Get the stream manifest path."""
-        return self.lake_root.extend(
-            *("raw", tap_id, stream_id, STREAM_MANIFEST_FILENAME)
+        return self.get_stream_path(tap_id=tap_id, stream_id=stream_id).extend(
+            STREAM_MANIFEST_FILENAME
+        )
+
+    def get_stream_file_path(self, stream_file: "SingerFile") -> GenericPath:
+        """Get the stream file path."""
+        return (
+            self.get_stream_path(
+                tap_id=stream_file.tap_id, stream_id=stream_file.stream_id
+            )
+            .extend(self.hash_stream_schema(stream_file.schema))
+            .extend(stream_file.filename)
         )

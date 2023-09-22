@@ -20,7 +20,8 @@ if t.TYPE_CHECKING:
 class SingerFile(BaseModel):
     """Singer file object."""
 
-    stream_id: str
+    tap_id: str
+    schema: dict
     parent_dir: Path
     partition: tuple[int, ...]
     min_time_extracted: datetime
@@ -36,6 +37,11 @@ class SingerFile(BaseModel):
         if self.encryption != "none":
             file_name += f".{self.encryption}"
         return file_name
+
+    @property
+    def stream_id(self):
+        """Return the stream ID."""
+        return self.schema["stream"]
 
     @property
     def path(self):
@@ -54,6 +60,7 @@ class SingerFileWriter:
         self.stream = stream
         self.records_written = 0
 
+        self._schema: dict | None = None
         self._tmp_dir: Path | None = None
         self._file: TextIOWrapper | None = None
         self._file_path: Path | None = None
@@ -126,7 +133,8 @@ class SingerFileWriter:
             self.file.close()
 
         singer_file = SingerFile(
-            stream_id=self.stream.stream_id,
+            tap_id=self.stream.tap.tap_id,
+            schema=self._schema,
             parent_dir=output_dir,
             partition=partition,
             min_time_extracted=self._min_time_extracted,
@@ -167,5 +175,7 @@ class SingerFileWriter:
         """Write a schema to the file."""
         if self._file is None:
             raise ValueError("File not open")
+
+        self._schema = schema
 
         self.file.write(f"{json.dumps(schema, ensure_ascii=False)}\n")
