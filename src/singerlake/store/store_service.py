@@ -21,8 +21,8 @@ class StoreService:
             singerlake=self.singerlake
         )
         path_manager = PathService(config=self.config.path).get_path_manager()
-
         if self.config.store_type == "local":
-            return LocalStore(locker=locker, path_manager=path_manager)
-
+            return LocalStore(
+                singerlake=self.singerlake, locker=locker, path_manager=path_manager
+            )
         raise ValueError(f"Unknown store type: {self.config.store_type}")

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import typing as t
 
 from singerlake.tap import Tap
@@ -19,14 +21,14 @@ class DiscoveryService:
     def list_taps(self) -> t.List[str]:
         """List available Taps."""
         if self._tap_cache is None:
-            lake_manifest = self.singerlake.manifest_service.lake_manifest
+            lake_manifest = self.singerlake.store.lake_manifest
             self._tap_cache = lake_manifest.taps
 
         return self._tap_cache
 
-    def get_tap(self, tap_id):
+    def get_tap(self, tap_id) -> Tap | None:
         """Get a Tap by ID."""
-        tap_manifest = self.singerlake.manifest_service.get_tap_manifest(tap_id=tap_id)
+        tap_manifest = self.singerlake.store.get_tap_manifest(tap_id=tap_id)
         if tap_manifest:
             return Tap(singerlake=self.singerlake, tap_manifest=tap_manifest)
-        raise ValueError(f"Tap {tap_id} not found.")
+        return None
