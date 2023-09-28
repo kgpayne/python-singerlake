@@ -33,7 +33,7 @@ class BaseStore(ABC):
     @property
     def lake_root(self) -> t.Any:
         """Return the Lake root path."""
-        return self.get_lake_root()
+        return self.path_manager.lake_root
 
     @property
     def lake_manifest(self) -> LakeManifest:

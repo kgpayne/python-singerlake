@@ -12,6 +12,7 @@ from uuid import uuid4
 from pydantic import BaseModel, Field
 
 import singerlake.singer.utils as su
+from singerlake.store.path_manager import Partition
 
 if t.TYPE_CHECKING:
     from .stream import Stream
@@ -23,7 +24,7 @@ class SingerFile(BaseModel):
     tap_id: str
     schema_: dict = Field(alias="schema")
     parent_dir: Path
-    partition: t.Tuple[int, ...]
+    partitions: t.Tuple[Partition, ...]
     min_time_extracted: datetime
     max_time_extracted: datetime
     encryption: t.Literal["none", "bz2", "gz"] = "none"
@@ -56,16 +57,22 @@ class SingerFile(BaseModel):
 class SingerFileWriter:
     """Base class for writing singer files to disk via temporary directories."""
 
-    def __init__(self, stream: "Stream") -> None:
+    def __init__(self, stream: "Stream", partitions: t.Tuple["Partition", ...]) -> None:
         self.stream = stream
-        self.records_written = 0
+        self.partitions = partitions
 
+        self._records_written = 0
         self._schema: dict | None = None
         self._tmp_dir: Path | None = None
         self._file: TextIOWrapper | None = None
         self._file_path: Path | None = None
         self._min_time_extracted: datetime | None = None
         self._max_time_extracted: datetime | None = None
+
+    @property
+    def records_written(self) -> int:
+        """Return the number of records written."""
+        return self._records_written
 
     @property
     def file_path(self) -> Path:
@@ -124,7 +131,7 @@ class SingerFileWriter:
         self._open_file(self.tmp_dir)
         return self
 
-    def close(self, output_dir: Path, partition: t.Tuple[t.Any, ...]) -> SingerFile:
+    def close(self, output_dir: Path) -> SingerFile:
         """Remove the temporary directory."""
         if self._file is None:
             raise ValueError("File not open")
@@ -136,7 +143,7 @@ class SingerFileWriter:
             tap_id=self.stream.tap.tap_id,
             schema=self._schema,
             parent_dir=output_dir,
-            partition=partition,
+            partitions=self.partitions,
             min_time_extracted=self._min_time_extracted,
             max_time_extracted=self._max_time_extracted,
         )
@@ -169,7 +176,7 @@ class SingerFileWriter:
 
         payload = json.dumps(record, ensure_ascii=False)
         self.file.write(f"{payload}\n")
-        self.records_written += 1
+        self._records_written += 1
 
     def write_schema(self, schema: dict) -> None:
         """Write a schema to the file."""

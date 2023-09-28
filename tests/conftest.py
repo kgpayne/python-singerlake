@@ -79,7 +79,8 @@ def _clean_lake_dir(lake_root: Path, lake_manifest: dict):
 def write_singerlake(write_singerlake_config: dict):
     singerlake = Singerlake(config=write_singerlake_config)
     singerlake.clean_working_dir()
-    lake_root = singerlake.store.get_lake_root()
+    lake_root = singerlake.store.lake_root
+    assert isinstance(lake_root, Path)
     if lake_root.exists():
         _clean_lake_dir(lake_root, {"lake_id": "merry-lizard"})
 

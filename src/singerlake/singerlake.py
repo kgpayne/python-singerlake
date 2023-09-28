@@ -6,8 +6,9 @@ from pathlib import Path
 from uuid import uuid4
 
 from singerlake.config import SingerlakeConfig
-from singerlake.discovery import DiscoveryService
 from singerlake.store import BaseStore, StoreService
+
+from singerlake.discovery import DiscoveryService  # isort:skip
 
 if t.TYPE_CHECKING:
     from singerlake.tap import Tap

@@ -8,7 +8,7 @@ if t.TYPE_CHECKING:
     from datetime import datetime
 
     from singerlake import Singerlake
-    from singerlake.config import Partition
+    from singerlake.store.path_manager.base import Partition
     from singerlake.tap import Tap
 
 
@@ -29,18 +29,12 @@ class Stream:
         self.singerlake = singerlake
         self.tap = tap
         self.stream_id = stream_id
-        self.partitions: t.List["Partition"] = (
-            self.singerlake.config.store.path.partition_by or []
-        )
 
         self.files: list[SingerFile] = []
 
-    def partition_record(self, time_extracted: "datetime") -> t.Tuple[str, ...]:
+    def partition_record(self, time_extracted: "datetime") -> t.Tuple["Partition", ...]:
         """Partition a record."""
-        partitions = [
-            getattr(time_extracted, partition.by) for partition in self.partitions
-        ]
-        return tuple(partitions)
+        return self.singerlake.store.path_manager.get_record_partitions(time_extracted)
 
     @contextmanager
     def record_writer(self):
