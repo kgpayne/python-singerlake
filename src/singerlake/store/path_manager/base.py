@@ -150,10 +150,7 @@ class BasePathManager:
         ]
         return tuple(partitions)
 
-    def format_partition(self, partition: Partition) -> str:
-        """Format a partition."""
-        return str(partition.value)
-
+    @t.final
     def hash_stream_schema(self, stream_schema: t.Mapping[str, t.Any]) -> str:
         """Calculate a unique short-hash for given schema."""
         data = json.dumps(stream_schema, sort_keys=True)
@@ -195,3 +192,7 @@ class BasePathManager:
         Override to transform GenericPath to a different path type.
         """
         return self.transformer.transform(path)
+
+    def format_partition(self, partition: Partition) -> str:
+        """Format a partition."""
+        return str(partition.value)
